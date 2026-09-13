@@ -1,0 +1,3 @@
+---
+- import_playbook: rancher-install.yml
+- import_playbook: rancher-validate.yml

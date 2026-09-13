@@ -1,0 +1,104 @@
+---
+- name: Validate Rancher platform
+  hosts: rke2_servers
+  gather_facts: false
+  become: true
+
+  vars:
+    kubeconfig_path: /etc/rancher/rke2/rke2.yaml
+    kubectl_binary_path: /var/lib/rancher/rke2/bin/kubectl
+
+  tasks:
+    - name: Wait for cert-manager deployment
+      ansible.builtin.command:
+        argv:
+          - "{{ kubectl_binary_path }}"
+          - --kubeconfig
+          - "{{ kubeconfig_path }}"
+          - rollout
+          - status
+          - deployment/cert-manager
+          - -n
+          - cert-manager
+          - --timeout=120s
+      changed_when: false
+      run_once: true
+
+    - name: Wait for Rancher deployment
+      ansible.builtin.command:
+        argv:
+          - "{{ kubectl_binary_path }}"
+          - --kubeconfig
+          - "{{ kubeconfig_path }}"
+          - rollout
+          - status
+          - deployment/rancher
+          - -n
+          - cattle-system
+          - --timeout=180s
+      changed_when: false
+      run_once: true
+
+    - name: Wait for Rancher TLS certificate
+      ansible.builtin.command:
+        argv:
+          - "{{ kubectl_binary_path }}"
+          - --kubeconfig
+          - "{{ kubeconfig_path }}"
+          - wait
+          - --for=condition=Ready
+          - certificate/tls-rancher-ingress
+          - -n
+          - cattle-system
+          - --timeout=120s
+      changed_when: false
+      run_once: true
+
+    - name: Read Rancher ingress hostname
+      ansible.builtin.command:
+        argv:
+          - "{{ kubectl_binary_path }}"
+          - --kubeconfig
+          - "{{ kubeconfig_path }}"
+          - get
+          - ingress
+          - rancher
+          - -n
+          - cattle-system
+          - -o
+          - jsonpath={.spec.rules[0].host}
+      register: rancher_ingress_hostname
+      changed_when: false
+      run_once: true
+
+    - name: Validate Rancher ingress hostname
+      ansible.builtin.assert:
+        that:
+          - rancher_ingress_hostname.stdout == rancher_hostname
+        fail_msg: >-
+          Rancher ingress hostname is {{ rancher_ingress_hostname.stdout }},
+          expected {{ rancher_hostname }}.
+      run_once: true
+
+    - name: Validate Rancher HTTPS endpoint
+      ansible.builtin.uri:
+        url: "https://{{ rancher_hostname }}/"
+        method: GET
+        validate_certs: false
+        status_code: 200
+        return_content: false
+      register: rancher_https
+      retries: 12
+      delay: 5
+      until: rancher_https.status == 200
+      run_once: true
+
+    - name: Report Rancher validation
+      ansible.builtin.debug:
+        msg:
+          - "Rancher deployment is available."
+          - "cert-manager is available."
+          - "Rancher TLS certificate is Ready."
+          - "Ingress hostname: {{ rancher_hostname }}"
+          - "HTTPS endpoint returned HTTP {{ rancher_https.status }}."
+      run_once: true
