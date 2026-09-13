@@ -1,0 +1,135 @@
+---
+- name: Configure Proxmox lab networking
+  hosts: proxmox_host
+  gather_facts: true
+  become: true
+
+  vars:
+    lab_network: "10.20.0.0/24"
+
+  tasks:
+    - name: Enable IPv4 forwarding persistently
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/99-proxmox-lab.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          net.ipv4.ip_forward = 1
+      notify: Reload sysctl
+
+    - name: Install NAT management script
+      ansible.builtin.copy:
+        dest: /usr/local/sbin/proxmox-lab-nat
+        owner: root
+        group: root
+        mode: "0755"
+        content: |
+          #!/bin/sh
+          set -eu
+
+          NETWORK="{{ lab_network }}"
+          STATE_FILE="/run/proxmox-lab-nat.interface"
+
+          get_default_interface() {
+              /usr/sbin/ip -4 route show default |
+                  /usr/bin/awk '
+                      $1 == "default" {
+                          for (i = 1; i <= NF; i++) {
+                              if ($i == "dev") {
+                                  print $(i + 1)
+                                  exit
+                              }
+                          }
+                      }
+                  '
+          }
+
+          case "${1:-}" in
+              start)
+                  IFACE="$(get_default_interface)"
+
+                  if [ -z "$IFACE" ]; then
+                      echo "No default-route interface found" >&2
+                      exit 1
+                  fi
+
+                  if ! /usr/sbin/iptables -t nat -C POSTROUTING \
+                      -s "$NETWORK" -o "$IFACE" -j MASQUERADE 2>/dev/null
+                  then
+                      /usr/sbin/iptables -t nat -A POSTROUTING \
+                          -s "$NETWORK" -o "$IFACE" -j MASQUERADE
+                  fi
+
+                  printf '%s\n' "$IFACE" > "$STATE_FILE"
+                  ;;
+
+              stop)
+                  IFACE=""
+
+                  if [ -r "$STATE_FILE" ]; then
+                      IFACE="$(/usr/bin/cat "$STATE_FILE")"
+                  fi
+
+                  if [ -n "$IFACE" ] &&
+                     /usr/sbin/iptables -t nat -C POSTROUTING \
+                         -s "$NETWORK" -o "$IFACE" -j MASQUERADE 2>/dev/null
+                  then
+                      /usr/sbin/iptables -t nat -D POSTROUTING \
+                          -s "$NETWORK" -o "$IFACE" -j MASQUERADE
+                  fi
+
+                  /usr/bin/rm -f "$STATE_FILE"
+                  ;;
+
+              *)
+                  echo "Usage: $0 {start|stop}" >&2
+                  exit 2
+                  ;;
+          esac
+      register: nat_script
+
+    - name: Install NAT systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/proxmox-lab-nat.service
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=NAT for Proxmox private lab network
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Type=oneshot
+          RemainAfterExit=yes
+          ExecStart=/usr/local/sbin/proxmox-lab-nat start
+          ExecStop=/usr/local/sbin/proxmox-lab-nat stop
+
+          [Install]
+          WantedBy=multi-user.target
+      register: nat_service
+
+    - name: Reload systemd when NAT service changes
+      ansible.builtin.systemd:
+        daemon_reload: true
+      when: nat_service.changed
+
+    - name: Restart NAT service when configuration changes
+      ansible.builtin.systemd:
+        name: proxmox-lab-nat.service
+        enabled: true
+        state: restarted
+      when: nat_script.changed or nat_service.changed
+
+    - name: Ensure NAT service is enabled and running
+      ansible.builtin.systemd:
+        name: proxmox-lab-nat.service
+        enabled: true
+        state: started
+
+  handlers:
+    - name: Reload sysctl
+      ansible.builtin.command:
+        cmd: sysctl --system
