@@ -18,9 +18,9 @@ La fase incorpora:
 - validación funcional mediante las APIs HTTP;
 - validación real de targets Prometheus;
 - adaptación de kube-prometheus-stack al modelo de seguridad de RKE2;
-- dimensionamiento específico para los recursos disponibles en el laboratorio.
+- dimensionamiento específico para los recursos disponibles en la plataforma.
 
-El objetivo no es únicamente instalar herramientas de monitorización, sino construir una solución coherente con la arquitectura del laboratorio, validar que recopila métricas reales y evitar introducir falsa alta disponibilidad o componentes innecesarios.
+El objetivo no es únicamente instalar herramientas de monitorización, sino construir una solución coherente con la arquitectura dla plataforma, validar que recopila métricas reales y evitar introducir falsa alta disponibilidad o componentes innecesarios.
 
 ## 2. Arquitectura
 
@@ -58,7 +58,7 @@ Esta distribución evita cargar innecesariamente los nodos de control, que dispo
 
 El clúster no disponía inicialmente de ninguna StorageClass.
 
-Para este laboratorio se descartó introducir almacenamiento distribuido como Longhorn o Ceph.
+Para esta plataforma se descartó introducir almacenamiento distribuido como Longhorn o Ceph.
 
 La infraestructura dispone de un único worker, por lo que desplegar almacenamiento distribuido no proporcionaría alta disponibilidad real y añadiría complejidad y consumo de recursos sin aportar una mejora arquitectónica efectiva.
 
@@ -162,7 +162,7 @@ resources:
 
 Flux es el único controlador GitOps responsable de estos componentes.
 
-Argo CD permanece disponible en el laboratorio para la comparación realizada durante la Fase 9, pero no gestiona los recursos de observabilidad ni almacenamiento.
+Argo CD permanece disponible en la plataforma para la comparación realizada durante la Fase 9, pero no gestiona los recursos de observabilidad ni almacenamiento.
 
 Esta separación evita que dos controladores GitOps intenten reconciliar los mismos objetos Kubernetes.
 
@@ -194,7 +194,7 @@ Commit inicial:
 
 ## 7. Dimensionamiento
 
-El laboratorio dispone de recursos limitados, especialmente en los nodos de control.
+La plataforma dispone de recursos limitados, especialmente en los nodos de control.
 
 Por este motivo los componentes centrales se concentran en rke2-worker01.
 
@@ -285,7 +285,7 @@ ReclaimPolicy: Delete
 
 La persistencia está asociada al worker rke2-worker01.
 
-Esta arquitectura es adecuada para el laboratorio, pero no debe interpretarse como almacenamiento altamente disponible.
+Esta arquitectura es adecuada para la plataforma, pero no debe interpretarse como almacenamiento altamente disponible.
 
 La pérdida permanente del worker implicaría la pérdida de los datos locales almacenados en estos volúmenes si no existe una copia externa.
 
@@ -542,7 +542,7 @@ El almacenamiento es local.
 
 Esto significa que la observabilidad no es altamente disponible.
 
-La decisión es coherente con el tamaño y propósito del laboratorio.
+La decisión es coherente con el tamaño y propósito dla plataforma.
 
 ### Seguridad
 
@@ -579,7 +579,7 @@ La solución actual presenta conscientemente las siguientes limitaciones:
 
 Estas limitaciones no están ocultas ni se presentan como características de alta disponibilidad.
 
-Forman parte del diseño consciente del laboratorio y permiten mantener una arquitectura proporcional a los recursos disponibles.
+Forman parte del diseño consciente dla plataforma y permiten mantener una arquitectura proporcional a los recursos disponibles.
 
 ## 18. Resultado de la fase
 
@@ -602,7 +602,7 @@ Se ha demostrado:
 13. validación mediante la API de targets de Prometheus;
 14. adaptación consciente al hardening de RKE2;
 15. todos los targets configurados en estado UP;
-16. dimensionamiento específico para el laboratorio;
+16. dimensionamiento específico para la plataforma;
 17. persistencia del estado mediante GitOps;
 18. separación clara de ownership entre Flux y Argo CD.
 

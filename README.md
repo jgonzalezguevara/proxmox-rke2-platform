@@ -1,6 +1,6 @@
-# Proxmox IaC Lab
+# Private Kubernetes Platform on Proxmox
 
-Laboratorio reproducible de Platform Engineering sobre Proxmox VE, construido con OpenTofu, Ansible, RKE2, Flux CD, Argo CD y kube-prometheus-stack.
+Plataforma Kubernetes privada y reproducible sobre Proxmox VE, construida con OpenTofu, Ansible, RKE2, Rancher, Flux CD, Argo CD y kube-prometheus-stack.
 
 El proyecto cubre el ciclo completo:
 
@@ -58,7 +58,7 @@ Sistema operativo: Debian 13.
 
 ## Red
 
-El laboratorio utiliza dos bridges:
+La plataforma utiliza dos bridges:
 
 - `vmbr0`: gestión y salida externa.
 - `vmbr1`: red privada `10.20.0.0/24` para RKE2.
@@ -300,7 +300,7 @@ Tras la rotación, los cuatro nodos permanecieron `Ready`.
 ## Estructura del repositorio
 
 ```text
-proxmox-iac-lab/
+proxmox-rke2-platform/
 ├── ansible/
 ├── argocd/
 ├── clusters/
@@ -354,7 +354,7 @@ El proyecto prioriza:
 - sin Alertmanager productivo;
 - sin disaster recovery multi-host.
 
-Estas limitaciones son explícitas y forman parte del alcance del laboratorio.
+Estas limitaciones son explícitas y forman parte del alcance y las decisiones arquitectónicas de la plataforma.
 
 ## Informe completo
 

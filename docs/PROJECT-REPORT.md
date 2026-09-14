@@ -1,10 +1,10 @@
-# Proxmox IaC Lab — Informe técnico completo
+# Private Kubernetes Platform on Proxmox — Informe técnico completo
 
 ## 1. Resumen ejecutivo
 
-`proxmox-iac-lab` es un laboratorio de infraestructura reproducible sobre Proxmox VE que recorre de extremo a extremo el ciclo de vida de una pequeña plataforma Kubernetes gestionada como código.
+`proxmox-rke2-platform` es una plataforma de infraestructura reproducible sobre Proxmox VE que recorre de extremo a extremo el ciclo de vida de una pequeña plataforma Kubernetes gestionada como código.
 
-El proyecto evolucionó desde un laboratorio inicial de aprovisionamiento de máquinas virtuales con OpenTofu hasta una plataforma RKE2 multi-nodo que integra:
+El proyecto evolucionó desde una fase inicial de aprovisionamiento de máquinas virtuales con OpenTofu hasta una plataforma RKE2 multi-nodo que integra:
 
 - Infrastructure as Code con OpenTofu.
 - Módulo reutilizable para máquinas virtuales Proxmox.
@@ -38,7 +38,7 @@ Los objetivos principales son:
 6. Validar Kubernetes mediante pruebas funcionales reales.
 7. Adoptar GitOps como modelo operativo.
 8. Comparar Flux CD y Argo CD sobre workloads reales.
-9. Añadir almacenamiento persistente adecuado al tamaño del laboratorio.
+9. Añadir almacenamiento persistente adecuado al tamaño dla plataforma.
 10. Incorporar observabilidad sin sobredimensionar el entorno.
 11. Mantener el hardening de RKE2.
 12. Mantener secretos, credenciales y estados locales fuera de Git.
@@ -158,7 +158,7 @@ con:
 insecure = true
 ```
 
-Esta decisión pertenece exclusivamente al laboratorio. OpenTofu se ejecuta desde el propio host Proxmox y accede a la API local.
+Esta decisión pertenece exclusivamente a la plataforma. OpenTofu se ejecuta desde el propio host Proxmox y accede a la API local.
 
 No debe interpretarse como patrón recomendado de producción. En producción sería preferible:
 
@@ -170,7 +170,7 @@ No debe interpretarse como patrón recomendado de producción. En producción se
 
 ---
 
-## 5. Red del laboratorio
+## 5. Red dla plataforma
 
 El entorno utiliza dos bridges de Proxmox.
 
@@ -183,7 +183,7 @@ Proxmox: 192.168.137.2/24
 Gateway: 192.168.137.1
 ```
 
-El gateway corresponde al entorno Windows ICS utilizado por el laboratorio.
+El gateway corresponde al entorno Windows ICS utilizado por la plataforma.
 
 ### 5.2 `vmbr1`
 
@@ -586,7 +586,7 @@ No se utilizan para competir sobre los mismos recursos. La comparación se reali
 Flux se encuentra bootstrappeado contra:
 
 ```text
-ssh://git@github.com/jgonzalezguevara/proxmox-iac-lab
+ssh://git@github.com/jgonzalezguevara/proxmox-rke2-platform
 ```
 
 Branch:
@@ -652,7 +652,7 @@ argocd/applications/argocd-demo.yaml
 Repositorio:
 
 ```text
-https://github.com/jgonzalezguevara/proxmox-iac-lab.git
+https://github.com/jgonzalezguevara/proxmox-rke2-platform.git
 ```
 
 Path:
@@ -1352,7 +1352,7 @@ No se debilita el hardening de RKE2 simplemente para eliminar targets `DOWN`.
 
 ## 36. Elementos deliberadamente no implementados
 
-El laboratorio no pretende incluir todas las tecnologías posibles.
+La plataforma no pretende incluir todas las tecnologías posibles.
 
 No se ha añadido:
 
@@ -1396,7 +1396,7 @@ Los control planes disponen de 4 GiB y el worker de 6 GiB.
 
 ### API Proxmox local con TLS no verificado
 
-Aceptable para el contexto aislado del laboratorio, no patrón de producción.
+Aceptable para el contexto aislado dla plataforma, no patrón de producción.
 
 ### Credenciales OpenTofu externas
 
@@ -1499,7 +1499,7 @@ Deben cargarse antes de ejecutar operaciones contra Proxmox.
 ## 39. Estructura principal del repositorio
 
 ```text
-proxmox-iac-lab/
+proxmox-rke2-platform/
 ├── ansible/
 │   ├── inventory/
 │   └── playbooks/
@@ -1572,7 +1572,7 @@ Este informe no los sustituye: proporciona una visión transversal de todo el pr
 
 ## 42. Conclusión
 
-`proxmox-iac-lab` evolucionó desde un ejercicio de creación de máquinas virtuales hasta una pequeña plataforma reproducible que recorre las capas fundamentales de una infraestructura moderna:
+`proxmox-rke2-platform` evolucionó desde un ejercicio de creación de máquinas virtuales hasta una plataforma reproducible que recorre las capas fundamentales de una infraestructura moderna:
 
 ```text
 virtualización
@@ -1603,9 +1603,9 @@ También se evitaron patrones engañosos:
 - abrir endpoints endurecidos solo para satisfacer Prometheus;
 - introducir componentes distribuidos sin recursos suficientes;
 - guardar tokens o credenciales en Git;
-- confundir una demo GitOps con propiedad compartida de recursos.
+- confundir una carga de validación GitOps con propiedad compartida de recursos.
 
-El resultado es un laboratorio pequeño en escala, pero representativo de tareas reales de Platform Engineering e Infrastructure Engineering:
+El resultado es una plataforma de alcance controlado, pero representativo de tareas reales de Platform Engineering e Infrastructure Engineering:
 
 - diseñar;
 - automatizar;

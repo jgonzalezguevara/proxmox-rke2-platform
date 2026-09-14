@@ -22,7 +22,7 @@ El objetivo no es únicamente instalar componentes, sino demostrar mediante prue
 
 ## 2. Arquitectura
 
-La red privada utilizada por el laboratorio es 10.20.0.0/24.
+La red privada utilizada por la plataforma es 10.20.0.0/24.
 
 Arquitectura Kubernetes:
 
@@ -195,7 +195,7 @@ Flux v2.9.5
 
 Repositorio:
 
-jgonzalezguevara/proxmox-iac-lab
+jgonzalezguevara/proxmox-rke2-platform
 
 Branch:
 
@@ -291,7 +291,7 @@ argocd/apps/argocd-demo/
 Configuración:
 
 source:
-https://github.com/jgonzalezguevara/proxmox-iac-lab.git
+https://github.com/jgonzalezguevara/proxmox-rke2-platform.git
 
 targetRevision:
 main
@@ -415,11 +415,11 @@ La prueba no permite concluir que una herramienta sea universalmente mejor que l
 
 ## 12. Consideraciones arquitectónicas
 
-La coexistencia de Flux CD y Argo CD en este laboratorio tiene una finalidad experimental y comparativa.
+La coexistencia de Flux CD y Argo CD en esta plataforma tiene una finalidad de evaluación comparativa.
 
 No se recomienda desplegar simultáneamente dos controladores GitOps sobre los mismos recursos productivos sin una razón concreta, ya que ambos podrían intentar reconciliar el mismo estado y generar conflictos.
 
-En este laboratorio cada herramienta dispone de una aplicación independiente:
+En esta plataforma cada herramienta dispone de una aplicación independiente:
 
 Flux CD -> flux-demo
 Argo CD -> argocd-demo
@@ -497,7 +497,7 @@ Flux           Argo CD
    Kubernetes
    workloads
 
-El laboratorio deja de ser únicamente una colección de máquinas virtuales y pasa a representar una plataforma reproducible con separación de responsabilidades:
+La plataforma deja de ser únicamente una colección de máquinas virtuales y pasa a representar una plataforma reproducible con separación de responsabilidades:
 
 - OpenTofu gestiona infraestructura.
 - Ansible automatiza la configuración y bootstrap.

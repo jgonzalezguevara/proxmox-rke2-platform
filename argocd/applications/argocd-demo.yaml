@@ -8,7 +8,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/jgonzalezguevara/proxmox-iac-lab.git
+    repoURL: https://github.com/jgonzalezguevara/proxmox-rke2-platform.git
     targetRevision: main
     path: argocd/apps/argocd-demo
 
